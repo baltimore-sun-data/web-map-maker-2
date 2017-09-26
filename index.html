@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Web map maker</title>
+    <meta charset="utf-8" />
+    <link rel="shortcut icon" type="image/x-icon" href="http://d1qqc1e9kvmdh8.cloudfront.net/img/favicon.ico">
+
+    <link rel="stylesheet" type="text/css" href="http://d1qqc1e9kvmdh8.cloudfront.net/bootstrap/2.3.2/css/bootstrap.min.css" />
+    <link rel="stylesheet" type="text/css" href="http://d1qqc1e9kvmdh8.cloudfront.net/css/ngux-tophat-0.4.5.min.css" />
+    <link rel="stylesheet" type="text/css" href="http://d1qqc1e9kvmdh8.cloudfront.net/bootstrap/2.3.2/css/bootstrap-responsive.min.css" />
+    <link rel="stylesheet" type="text/css" href="http://d1qqc1e9kvmdh8.cloudfront.net/css/ngux-tophat-responsive-0.4.5.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet-geocoder-mapzen/1.4.1/leaflet-geocoder-mapzen.css">
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.1/css/font-awesome.min.css">
+
+    <link rel="stylesheet" href="http://cookbook.latimes.com/js/leaflet-1.0.0/leaflet.css">
+    <link rel="stylesheet" href="http://cookbook.latimes.com/css/jquery-ui-1.12.0/jquery-ui-1.12.0.css">
+    <link rel="stylesheet" href="http://cookbook.latimes.com/css/bing-geocodify-0.2.3/bing-geocodifier.css">
+    <link rel="stylesheet" href="styles/styles.css">
+
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+
+    <script type="text/javascript" src="http://cookbook.latimes.com/js/bing-geocodify-0.2.3/bing-geocodifier.js"></script>
+
+    <script type="text/javascript" src="http://d1qqc1e9kvmdh8.cloudfront.net/bootstrap/2.3.2/js/bootstrap.min.js"></script>
+
+    <script type="text/javascript" src="http://d1qqc1e9kvmdh8.cloudfront.net/js/underscore-1.8.3-min.js"></script>
+
+    <script type="text/javascript" src="http://cookbook.latimes.com/js/leaflet-1.0.0/leaflet.js"></script>
+
+    <script type="text/javascript" src="http://cookbook.latimes.com/js/tangram-0.13.0-min.js"></script>
+
+    <script type="text/javascript" src="http://cookbook.latimes.com/js/html2canvas-0.5.js"></script>
+
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+
+    <script type="text/javascript" src="http://cookbook.latimes.com/js/leaflet-bing-layer-0.0.1.js"></script>
+
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-geocoder-mapzen/1.4.1/leaflet-geocoder-mapzen.js"></script>
+
+    <!-- your config file -->
+    <script type="text/javascript" src="js/config.js"></script>
+
+</head>
+<body>
+    <!-- CONTENT GOES HERE -->
+    <div class="container" id="container">
+        <h1>Web Map Maker<a id="mapmakerVersion" href="https://github.com/datadesk/web-map-maker/releases/tag/v2.1.1">v2.1.1</a></h1>
+        <div id="popupContainer">
+            <input id="popupText" type="text" placeholder="Pointer text" maxlength="40"><div id="geocodifier"></div>
+        </div>
+
+        <div id="web_blank">
+
+            <div id="map_options">
+                <div class="map_option">
+                    <div id="geocoder"></div>
+                </div>
+                <div class="map_option">
+                    <form class="standalone-dropdown">
+                        <fieldset>
+                            <select onchange="sizeChange(this)" id="preset_sizes">
+                                <option value="custom">Custom size</option>
+                                <option value="video">Video</option>
+                                <option value="web_large" selected>Web large</option>
+                                <option value="web_small">Web small</option>
+                                <option value="twitter">Twitter</option>
+                                <option value="col1">1 column</option>
+                                <option value="col2">2 column</option>
+                                <option value="col3">3 column</option>
+                                <option value="col4">4 column</option>
+                            </select>
+                        </fieldset>
+                    </form>
+                </div>
+
+                <div class="map_option">
+                    <input type="file" id="geo_files" name="files[]" accept=".geojson,.json" multiple>
+                    <label for="geo_files" class="btn gray">Upload GeoJSON</label>
+                    <a id="zoom_to_geojson">Zoom to file</a>
+                </div>
+                <div class="map_option">
+                    <form>
+                      <div class="multiselect">
+                        <div class="selectBox" onclick="showCheckboxes()">
+                          <select>
+                            <option>Layers</option>
+                          </select>
+                          <div class="overSelect"></div>
+                        </div>
+                        <div id="checkboxes"></div>
+                      </div>
+                    </form>
+                </div>
+
+                <div class="map_option">
+                    <button class='btn gray' onclick='addCustomLabel("small");'>+small label</button>
+                    <button class='btn gray' onclick='addCustomLabel("medium");'>+medium label</button>
+                </div>
+
+                <div class="map_option">
+                    <button class='btn gray' onclick='downloadIMG();' id='download_img'>Map loading...<img src="images/preloader.gif" alt="Preloader" class="map_loader" /></button>
+                    <button class='btn' onclick='downloadVector();' id='download_vector'>Download vector</button>
+                </div>
+
+
+
+
+
+                <p class='map-info'>Zoom: <span id="zoom_level"></span> <i class="fa fa-unlock-alt" id="zoom_lock" onclick="zoomFreeze();" aria-hidden="true"></i> <span id="warning_msg"></span></p>
+
+                <input type="range" step="0.001" id="zoom-slider" class="graphic-slider" min="2" max="19" value="10">
+
+
+
+            </div>
+            <div id="map_area">
+                <div id="grid_holder">
+                    <div id="map_ruler">
+                        <div id="col_ruler"></div>
+                        <div id="pixel_ruler"></div>
+                    </div>
+                </div>
+                <div id="map_holder">
+
+                    <div id="map"></div>
+
+                    <div id="map_size"></div>
+                </div>
+            </div>
+        </div>
+
+        <p class="description">This tool uses Microsoft’s geocoder to approximate an address’s location. It also uses data provided by OpenStreetMap (which you can <a href="http://www.openstreetmap.org/" target="_blank">edit here</a>) and Mapzen. Some supervisor, congressional and other GeoJSON boundaries can be found at <a href="http://boundaries.latimes.com/" target="_blank">boundaries.latimes.com</a>. You can draw your own file at <a href="http://geojson.io/" target="_blank">geojson.io</a>. Questions? Contact <a href="mailto:jon@latimes.com">jon@latimes.com</a> or <a href="https://github.com/datadesk/web-map-maker/issues" target="_blank">submit a bug</a> in GitHub.</p>
+
+        <canvas id="canvas" width="1300" height="730"></canvas>
+
+        <div id="img-out"></div>
+
+
+    </div>
+
+
+
+    <div id="tooltip"></div>
+
+    <!-- load all the JS -->
+    <script type="text/javascript" src="http://cookbook.latimes.com/js/d3-3.5.6/d3.min.js"></script>
+    <script type="text/javascript" src="js/svg-export.js?v=2"></script>
+    <script type="text/javascript" src="js/app.js"></script>
+
+
+
+</body>
+</html>
